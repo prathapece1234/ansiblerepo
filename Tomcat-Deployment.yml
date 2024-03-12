@@ -1,0 +1,35 @@
+- hosts: all
+  remote_user: ec2-user
+  become: yes
+  tasks:
+    - name : updating yum package
+      yum :
+       name : "*"
+       state : latest
+
+    - name : install java
+      yum :
+        name : java-1.8.0-openjdk
+        state : present
+
+    - name: Download the tomcat from official website
+      get_url:
+        url: https://dlcdn.apache.org/tomcat/tomcat-8/v8.5.88/bin/apache-tomcat-8.5.88.tar.gz
+        dest: /opt
+        mode: '0777'
+
+    - name: Unarchive a file that is already on the remote machine
+      unarchive:
+        src: /opt/apache-tomcat-8.5.88.tar.gz
+        dest: /opt
+        remote_src: yes
+        mode: '0777'
+
+    - name: start tomcat
+      shell: nohup /opt/apache-tomcat-8.5.88/bin/startup.sh &
+
+    - name: Application Deployement
+      copy:
+        src: ./sample.war
+        dest: /opt/apache-tomcat-8.5.88/webapps/sample.war
+        mode: '0777'
